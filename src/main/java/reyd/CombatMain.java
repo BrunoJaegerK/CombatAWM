@@ -139,14 +139,19 @@ public class CombatMain extends PluginBase {
     public static String key(String name){return name.toLowerCase(Locale.ROOT);}
 
     @Override public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if(args.length==0||args[0].equalsIgnoreCase("status")){
+        String action = args.length == 0 ? "status" : args[0].toLowerCase(Locale.ROOT);
+        if (label.equalsIgnoreCase("pvp") || label.equalsIgnoreCase("pvptoggle")) action = "toggle";
+        else if (label.equalsIgnoreCase("pvpstatus") || label.equalsIgnoreCase("tag")) action = "status";
+        else if (label.equalsIgnoreCase("pvplist")) action = "list";
+        else if (label.equalsIgnoreCase("newbie")) action = "newbie";
+        if(action.equalsIgnoreCase("status")){
             if(!(sender instanceof Player)){sender.sendMessage("Use /combat reload from console.");return true;}
             Player p=(Player)sender;
             sender.sendMessage(getConfig().getString("Messages.Status","§ePvP: {pvp} §7| Combat: {combat}").replace("{pvp}",isPvPEnabled(p)?"§aON":"§cOFF").replace("{combat}",isCombatTagged(p)?"§cTAGGED":"§aSAFE"));
             if(isNewbieProtected(p))sender.sendMessage(getConfig().getString("Messages.NewbieStatus","§aNewbie protection: §e{time}s").replace("{time}",String.valueOf(getNewbieSeconds(p))));
             return true;
         }
-        if(args[0].equalsIgnoreCase("toggle")){
+        if(action.equalsIgnoreCase("toggle")){
             if(!(sender instanceof Player)){sender.sendMessage("In-game only.");return true;}
             Player p=(Player)sender;
             if(isCombatTagged(p)){p.sendMessage(getConfig().getString("Messages.ToggleInCombat","§cYou cannot toggle PvP while tagged in combat."));return true;}
@@ -155,24 +160,24 @@ public class CombatMain extends PluginBase {
             p.sendMessage(getConfig().getString(enabled?"Messages.PvPEnabled":"Messages.PvPDisabled",enabled?"§aPvP enabled.":"§cPvP disabled."));
             return true;
         }
-        if(args[0].equalsIgnoreCase("newbie")){
+        if(action.equalsIgnoreCase("newbie")){
             if(!(sender instanceof Player)){sender.sendMessage("In-game only.");return true;}
             Player p=(Player)sender;
             if(args.length>1&&args[1].equalsIgnoreCase("disable")){boolean changed=disableNewbieProtection(p);p.sendMessage(getConfig().getString(changed?"Messages.NewbieDisabled":"Messages.NewbieCannotDisable",changed?"§aProtection disabled.":"§cYou cannot disable protection or it is not active."));}
             else p.sendMessage(getConfig().getString("Messages.NewbieStatus","§aNewbie protection: §e{time}s").replace("{time}",String.valueOf(getNewbieSeconds(p))));
             return true;
         }
-        if(args[0].equalsIgnoreCase("list")){
+        if(action.equalsIgnoreCase("list")){
             StringBuilder b=new StringBuilder("§aPvP enabled: ");
             for(Player online:getServer().getOnlinePlayers().values())if(isPvPEnabled(online))b.append(online.getName()).append(", ");
             sender.sendMessage(b.toString());return true;
         }
-        if(args[0].equalsIgnoreCase("untag")){
+        if(action.equalsIgnoreCase("untag")){
             if(!sender.hasPermission("combatawm.admin")){sender.sendMessage(getConfig().getString("Messages.NoPermission","§cNo permission."));return true;}
             if(args.length<2){sender.sendMessage("§e/combat untag <player>");return true;}
             Player target=getServer().getPlayer(args[1]);if(target==null){sender.sendMessage("§cPlayer not online.");return true;}removeCombatPair(target);sender.sendMessage("§aCombat tag cleared.");return true;
         }
-        if(args[0].equalsIgnoreCase("reload")){
+        if(action.equalsIgnoreCase("reload")){
             if(!sender.hasPermission("combatawm.admin")){sender.sendMessage(getConfig().getString("Messages.NoPermission","§cNo permission."));return true;}
             reloadConfig();loadSettings();loadPvPStates();loadProtectionData();sender.sendMessage(getConfig().getString("Messages.Reloaded","§aReloaded."));return true;
         }
