@@ -97,8 +97,8 @@ public class CombatMain extends PluginBase {
     public boolean isAreaProtectionPvPAllowed(Player attacker, Player victim) {
         if (!getConfig().getBoolean("AreaProtectionIntegration.Enabled", true)) return true;
         try {
-            cn.nukkit.plugin.Plugin areaProtection = getServer().getPluginManager().getPlugin("AreaProtection");
-            if (areaProtection == null || !areaProtection.isEnabled()) return true;
+            Object areaProtection = getServer().getPluginManager().getPlugin("AreaProtection");
+            if (areaProtection == null || !Boolean.TRUE.equals(areaProtection.getClass().getMethod("isEnabled").invoke(areaProtection))) return true;
 
             java.lang.reflect.Method getAreaByPos = areaProtection.getClass().getMethod("getAreaByPos", cn.nukkit.level.Position.class);
             java.lang.reflect.Method hasBypass = areaProtection.getClass().getMethod("hasBypassPerms", Player.class);
