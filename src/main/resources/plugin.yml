@@ -16,7 +16,7 @@ permissions:
   combatawm.admin:
     default: op
   combatawm.bypass.commands:
-    default: op
+    default: false
   combatawm.bypass.actions:
     default: op
   combatawm.bypass.borderhopping:
