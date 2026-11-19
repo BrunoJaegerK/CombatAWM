@@ -21,6 +21,8 @@ permissions:
     default: op
   combatawm.bypass.borderhopping:
     default: op
+  combatawm.bypass.areaprotection:
+    default: false
   combatawm.bypass.togglecooldown:
     default: op
   combatawm.bypass.killabuse:
