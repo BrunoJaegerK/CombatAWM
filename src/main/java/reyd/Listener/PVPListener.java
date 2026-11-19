@@ -1,59 +1,93 @@
 package reyd.Listener;
 
 import cn.nukkit.Player;
+import cn.nukkit.entity.Entity;
+import cn.nukkit.entity.projectile.EntityProjectile;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.Listener;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
-import cn.nukkit.event.entity.EntityDamageEvent;
+import cn.nukkit.event.player.PlayerCommandPreprocessEvent;
 import cn.nukkit.event.player.PlayerDeathEvent;
 import cn.nukkit.event.player.PlayerQuitEvent;
 import reyd.CombatMain;
+
+import java.util.Locale;
 
 public class PVPListener implements Listener {
 
     @EventHandler
     public void onEntityDamage(EntityDamageByEntityEvent event) {
+        if (event.isCancelled() || !(event.getEntity() instanceof Player)) return;
 
-        // PVP STUFF
-        if (!event.isCancelled()) {
-            if (event.getEntity() instanceof Player) {
-                if (event.getDamager() instanceof Player) {
+        Player victim = (Player) event.getEntity();
+        Entity source = event.getDamager();
+        Player attacker = null;
 
-                    // add to cooldown
-                    if (event.getCause() == EntityDamageEvent.DamageCause.ENTITY_ATTACK) {
-                        CombatMain.getInstance().startPVP(event.getEntity().getName(), (Player) event.getDamager(), ((Player) event.getEntity()).getPlayer());
-                        CombatMain.getInstance().startPVP(event.getDamager().getName(), (Player) event.getEntity(), ((Player) event.getDamager()).getPlayer());
-                    }
+        if (source instanceof Player) {
+            attacker = (Player) source;
+        } else if (source instanceof EntityProjectile) {
+            Entity shooter = ((EntityProjectile) source).shootingEntity;
+            if (shooter instanceof Player) attacker = (Player) shooter;
+        }
 
-                    // add to cooldown
-                    if (event.getCause() == EntityDamageEvent.DamageCause.PROJECTILE){
-                        CombatMain.getInstance().startPVP(event.getEntity().getName(), (Player) event.getDamager(), ((Player) event.getEntity()).getPlayer());
-                        CombatMain.getInstance().startPVP(event.getDamager().getName(), (Player) event.getEntity(), ((Player) event.getDamager()).getPlayer());
-                    }
+        if (attacker == null || attacker.equals(victim)) return;
 
-                }
+        CombatMain plugin = CombatMain.getInstance();
+        if (plugin.isWorldExcluded(attacker) || plugin.isWorldExcluded(victim)) return;
+
+        if (!plugin.isPvPEnabled(attacker) || !plugin.isPvPEnabled(victim)) {
+            event.setCancelled(true);
+            attacker.sendMessage(plugin.getConfig().getString("Messages.PvPDisabledForFight",
+                    "§cPvP is disabled for one of the players."));
+            return;
+        }
+
+        if (plugin.getConfig().getBoolean("CombatTag.TagOnlyWhenDamageIsApplied", true)
+                && event.getFinalDamage() <= 0) return;
+
+        plugin.startPVP(victim.getName(), attacker, victim);
+        plugin.startPVP(attacker.getName(), victim, attacker);
+    }
+
+    @EventHandler
+    public void onCommand(PlayerCommandPreprocessEvent event) {
+        CombatMain plugin = CombatMain.getInstance();
+        if (!plugin.isCombatTagged(event.getPlayer())
+                || !plugin.getConfig().getBoolean("CombatTag.BlockCommands.Enabled", false)) return;
+
+        String message = event.getMessage().trim();
+        if (!message.startsWith("/")) return;
+        String command = message.substring(1).split("\\s+")[0].toLowerCase(Locale.ROOT);
+
+        boolean whitelist = plugin.getConfig().getBoolean("CombatTag.BlockCommands.WhitelistMode", false);
+        java.util.List<String> list = plugin.getConfig().getStringList("CombatTag.BlockCommands.List");
+        boolean inList = false;
+        for (String entry : list) {
+            String normalized = entry.toLowerCase(Locale.ROOT).replace("/", "");
+            if (command.equals(normalized) || command.startsWith(normalized + ":")) {
+                inList = true;
+                break;
             }
+        }
+
+        if ((whitelist && !inList) || (!whitelist && inList)) {
+            event.setCancelled(true);
+            event.getPlayer().sendMessage(plugin.getConfig().getString("Messages.CommandBlocked",
+                    "§cYou cannot use this command while in combat."));
         }
     }
 
     @EventHandler
     public void onQuitEvent(PlayerQuitEvent event) {
-
-        // If player quit the Game he will die
-        if (CombatMain.getInstance().cooldownH.containsKey(event.getPlayer().getName())){
-            CombatMain.getInstance().cooldownH.get(event.getPlayer().getName()).quitGame();
+        CombatMain plugin = CombatMain.getInstance();
+        if (plugin.isCombatTagged(event.getPlayer())) {
+            plugin.cooldownH.get(CombatMain.key(event.getPlayer().getName())).quitGame();
         }
-
     }
 
     @EventHandler
     public void onDeathEvent(PlayerDeathEvent event) {
-
-        // After the Death of Entity remove the BossBar
-        if (CombatMain.getInstance().cooldownH.containsKey(event.getEntity().getName())){
-            CombatMain.getInstance().cooldownH.get(event.getEntity().getName()).removePlayer();
-        }
-
+        CombatMain plugin = CombatMain.getInstance();
+        plugin.removeCombatPair(event.getEntity());
     }
-
 }
