@@ -141,6 +141,7 @@ public class CombatMain extends PluginBase {
             java.lang.reflect.Method hasBypass = areaProtection.getClass().getMethod("hasBypassPerms", Player.class);
             boolean bypass = Boolean.TRUE.equals(hasBypass.invoke(areaProtection, attacker))
                     && getConfig().getBoolean("AreaProtectionIntegration.RespectBypass", true);
+            if (bypass) return true;
 
             // AreaProtection puede tener regiones superpuestas. Su getAreaByPos()
             // devuelve solo la primera; aquí revisamos todas para no ignorar una
