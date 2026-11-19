@@ -44,6 +44,11 @@ public class PVPListener implements Listener {
             return;
         }
         if(attacker.equals(victim))return;
+        if(!plugin.isAreaProtectionPvPAllowed(attacker,victim)) {
+            event.setCancelled(true);
+            attacker.sendMessage(plugin.getConfig().getString("Messages.AreaProtectionPvPDisabled","§cPvP is disabled in this protected area."));
+            return;
+        }
         if(plugin.isWorldExcluded(attacker)||plugin.isWorldExcluded(victim))return;
 
         if(!plugin.isPvPEnabled(attacker)||!plugin.isPvPEnabled(victim)) {
