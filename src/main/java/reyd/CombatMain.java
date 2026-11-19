@@ -94,6 +94,42 @@ public class CombatMain extends PluginBase {
     /** Optional reflective integration with AreaProtection (no compile-time dependency). */
     private boolean areaProtectionWarningLogged = false;
 
+
+    /**
+     * Comprueba si el movimiento entra en una región de AreaProtection configurada
+     * como zona segura frente al escape de combate. No depende de la bandera pvp:
+     * estas regiones pueden permitir PvP y aun así impedir que un jugador escape allí.
+     */
+    public boolean isEnteringCombatRestrictedArea(cn.nukkit.level.Position from, cn.nukkit.level.Position to) {
+        if (!getConfig().getBoolean("AreaProtectionIntegration.Enabled", true)
+                || !getConfig().getBoolean("AreaProtectionIntegration.BlockCombatEntry", true)
+                || to == null) return false;
+        java.util.List<String> restricted = getConfig().getStringList("AreaProtectionIntegration.CombatEntryBlockedAreas");
+        if (restricted == null || restricted.isEmpty()) return false;
+        try {
+            Object areaProtection = getServer().getPluginManager().getPlugin("AreaProtection");
+            if (areaProtection == null || !Boolean.TRUE.equals(areaProtection.getClass().getMethod("isEnabled").invoke(areaProtection))) return false;
+            java.lang.reflect.Method getAreaByPos = areaProtection.getClass().getMethod("getAreaByPos", cn.nukkit.level.Position.class);
+            Object destinationArea = getAreaByPos.invoke(areaProtection, to);
+            if (destinationArea == null) return false;
+            String destinationName = String.valueOf(destinationArea.getClass().getMethod("getName").invoke(destinationArea));
+            boolean destinationRestricted = restricted.stream().anyMatch(n -> n.equalsIgnoreCase(destinationName));
+            if (!destinationRestricted) return false;
+            Object originArea = from == null ? null : getAreaByPos.invoke(areaProtection, from);
+            if (originArea == null) return true;
+            String originName = String.valueOf(originArea.getClass().getMethod("getName").invoke(originArea));
+            return !originName.equalsIgnoreCase(destinationName);
+        } catch (Throwable error) {
+            if (!areaProtectionWarningLogged) {
+                areaProtectionWarningLogged = true;
+                getLogger().warning("No se pudo consultar AreaProtection para bloquear la entrada a zonas durante combate: "
+                        + error.getClass().getSimpleName() + ": " + error.getMessage());
+            }
+            // Si no se puede verificar la región, no bloqueamos movimientos ajenos.
+            return false;
+        }
+    }
+
     public boolean isAreaProtectionPvPAllowed(Player attacker, Player victim) {
         if (!getConfig().getBoolean("AreaProtectionIntegration.Enabled", true)) return true;
         try {
