@@ -99,9 +99,29 @@ public class PVPListener implements Listener {
     }
 
     @EventHandler
+    public void onMove(PlayerMoveEvent event) {
+        if (event.isCancelled()) return;
+        CombatMain plugin=CombatMain.getInstance();
+        Player player=event.getPlayer();
+        if (!plugin.isCombatTagged(player) || player.hasPermission("combatawm.bypass.borderhopping")) return;
+        if (plugin.isEnteringCombatRestrictedArea(event.getFrom(), event.getTo())) {
+            event.setCancelled(true);
+            player.sendMessage(plugin.getConfig().getString("Messages.CombatAreaEntryBlocked",
+                    "§cNo puedes entrar en esa zona mientras estés en combate."));
+        }
+    }
+
+    @EventHandler
     public void onTeleport(PlayerTeleportEvent event) {
         CombatMain plugin=CombatMain.getInstance();
         Player p=event.getPlayer();
+        if (plugin.isCombatTagged(p) && !p.hasPermission("combatawm.bypass.borderhopping")
+                && plugin.isEnteringCombatRestrictedArea(event.getFrom(), event.getTo())) {
+            event.setCancelled(true);
+            p.sendMessage(plugin.getConfig().getString("Messages.CombatAreaEntryBlocked",
+                    "§cNo puedes entrar en esa zona mientras estés en combate."));
+            return;
+        }
         if(!plugin.isCombatTagged(p)||!plugin.getConfig().getBoolean("AntiBorderHopping.Enabled",false)||p.hasPermission("combatawm.bypass.borderhopping"))return;
         if(event.getTo()!=null&&plugin.getConfig().getStringList("AntiBorderHopping.SafeWorlds").contains(event.getTo().getLevel().getName())) {
             event.setCancelled(true);
