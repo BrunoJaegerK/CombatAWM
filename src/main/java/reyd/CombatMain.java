@@ -107,6 +107,9 @@ public class CombatMain extends PluginBase {
     }
     public boolean disableNewbieProtection(Player p) {
         if (!getConfig().getBoolean("NewbieProtection.AllowPlayerDisable",true)) return false;
+        return removeNewbieProtection(p);
+    }
+    public boolean removeNewbieProtection(Player p) {
         if (newbieExpiry.remove(key(p)) != null) { saveProtectionData(); return true; }
         return false;
     }
@@ -178,7 +181,8 @@ public class CombatMain extends PluginBase {
         if(action.equalsIgnoreCase("newbie")){
             if(!(sender instanceof Player)){sender.sendMessage("In-game only.");return true;}
             Player p=(Player)sender;
-            if(args.length>1&&args[1].equalsIgnoreCase("disable")){boolean changed=disableNewbieProtection(p);p.sendMessage(getConfig().getString(changed?"Messages.NewbieDisabled":"Messages.NewbieCannotDisable",changed?"§aProtection disabled.":"§cYou cannot disable protection or it is not active."));}
+            String newbieSub = label.equalsIgnoreCase("newbie") ? (args.length>0 ? args[0] : "") : (args.length>1 ? args[1] : "");
+            if(newbieSub.equalsIgnoreCase("disable")){boolean changed=disableNewbieProtection(p);p.sendMessage(getConfig().getString(changed?"Messages.NewbieDisabled":"Messages.NewbieCannotDisable",changed?"§aProtection disabled.":"§cYou cannot disable protection or it is not active."));}
             else p.sendMessage(getConfig().getString("Messages.NewbieStatus","§aNewbie protection: §e{time}s").replace("{time}",String.valueOf(getNewbieSeconds(p))));
             return true;
         }
