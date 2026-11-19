@@ -39,7 +39,9 @@ public class DetailsPVP {
     private void updateBossBar() {
         if (dummyBossBar == null) return;
         dummyBossBar.setText(getText());
-        float progress = time * 100f / Math.max(1,\n                CombatMain.getInstance().getConfig().getInt("CombatTag.DurationSeconds", 20));\n        dummyBossBar.setLength(Math.min(100f, Math.max(0f, progress)));
+        float progress = time * 100f / Math.max(1,
+                CombatMain.getInstance().getConfig().getInt("CombatTag.DurationSeconds", 20));
+        dummyBossBar.setLength(Math.min(100f, Math.max(0f, progress)));
     }
 
     public int decreaseCooldown() {
