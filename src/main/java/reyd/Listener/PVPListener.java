@@ -51,6 +51,13 @@ public class PVPListener implements Listener {
             attacker.sendMessage(plugin.getConfig().getString("Messages.PvPDisabledForFight","§cPvP is disabled for one of the players."));
             return;
         }
+        if(plugin.getConfig().getBoolean("AntiKillAbuse.Enabled",true)
+                && event.getFinalDamage() >= victim.getHealth()
+                && plugin.isKillLimitReached(attacker,victim)) {
+            event.setCancelled(true);
+            attacker.sendMessage(plugin.getConfig().getString("Messages.KillAbuse","§cRepeatedly killing the same player is restricted."));
+            return;
+        }
         if(plugin.getConfig().getBoolean("CombatTag.TagOnlyWhenDamageIsApplied",true)&&event.getFinalDamage()<=0)return;
         plugin.startPVP(victim.getName(),attacker,victim);
         plugin.startPVP(attacker.getName(),victim,attacker);
