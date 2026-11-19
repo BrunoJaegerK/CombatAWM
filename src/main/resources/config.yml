@@ -54,6 +54,8 @@ Messages:
   ToggleInCombat: '§cYou cannot toggle PvP while tagged in combat.'
   ToggleCooldown: '§cWait {time}s before toggling PvP again.'
   NewbieStatus: '§aNewbie protection: §e{time}s remaining.'
+  NewbieStarted: '§aYou have newbie protection for §e{time}s§a.'
+  NewbieExpired: '§aYour newbie protection has expired.'
   NewbieDisabled: '§aYour newbie protection has been disabled.'
   NewbieCannotDisable: '§cYou cannot disable protection or it is not active.'
   NewbieProtectedTarget: '§cThat player has newbie protection.'
