@@ -132,6 +132,11 @@ public class PVPListener implements Listener {
         if(plugin.isCombatTagged(event.getPlayer()))plugin.cooldownH.get(CombatMain.key(event.getPlayer().getName())).quitGame();
     }
     @EventHandler
+    public void onRespawn(PlayerRespawnEvent event) {
+        CombatMain.getInstance().grantRespawnProtection(event.getPlayer());
+    }
+
+    @EventHandler
     public void onDeath(PlayerDeathEvent event) {
         CombatMain plugin=CombatMain.getInstance();
         Player victim=event.getEntity();
@@ -139,7 +144,6 @@ public class PVPListener implements Listener {
         Player killer=last instanceof EntityDamageByEntityEvent?getAttacker(((EntityDamageByEntityEvent)last).getDamager()):null;
         if(killer!=null&&killer!=victim)plugin.recordKill(killer,victim);
         plugin.removeCombatPair(victim);
-        plugin.grantRespawnProtection(victim);
         if(plugin.getConfig().getBoolean("NewbieProtection.RemoveOnDeath",true))plugin.disableNewbieProtection(victim);
     }
 }
