@@ -184,10 +184,41 @@ public class CombatMain extends PluginBase {
                 boolean containsVictim = Boolean.TRUE.equals(area.getClass()
                         .getMethod("isInArea", cn.nukkit.level.Position.class).invoke(area, victim.getPosition()));
                 if (!containsAttacker && !containsVictim) continue;
-                java.util.Map<?, ?> flags = (java.util.Map<?, ?>) area.getClass().getMethod("getFlags").invoke(area);
-                if (flags == null || !flags.containsKey("pvp")) continue;
-                boolean allowed = Boolean.TRUE.equals(area.getClass().getMethod("isAllowed", String.class).invoke(area, "pvp"));
-                if (!allowed && !(containsAttacker && !containsVictim && bypass)) return false;
+                // No asumir que el mapa usa exactamente la clave "pvp":
+                // algunas compilaciones de AreaProtection conservan el nombre
+                // de la bandera dentro del objeto AreaFlag.
+                Object rawFlags = area.getClass().getMethod("getFlags").invoke(area);
+                if (!(rawFlags instanceof java.util.Map)) continue;
+                boolean hasPvPFlag = false;
+                boolean pvpAllowed = true;
+                for (Object flag : ((java.util.Map<?, ?>) rawFlags).values()) {
+                    if (flag == null) continue;
+                    java.lang.reflect.Field nameField = flag.getClass().getField("name");
+                    Object flagName = nameField.get(flag);
+                    if (flagName == null || !"pvp".equalsIgnoreCase(String.valueOf(flagName))) continue;
+                    hasPvPFlag = true;
+                    java.lang.reflect.Field allowedField = flag.getClass().getField("allowed");
+                    pvpAllowed = Boolean.TRUE.equals(allowedField.get(flag));
+                    break;
+                }
+                // Compatibilidad con implementaciones que no exponen el nombre
+                // en los valores pero sí aceptan isAllowed("pvp").
+                if (!hasPvPFlag) {
+                    try {
+                        java.util.Map<?, ?> flags = (java.util.Map<?, ?>) rawFlags;
+                        for (Object mapKey : flags.keySet()) {
+                            if (mapKey != null && "pvp".equalsIgnoreCase(String.valueOf(mapKey))) {
+                                hasPvPFlag = true;
+                                pvpAllowed = Boolean.TRUE.equals(area.getClass()
+                                        .getMethod("isAllowed", String.class).invoke(area, "pvp"));
+                                break;
+                            }
+                        }
+                    } catch (Throwable ignored) {
+                        // Una región sin bandera PvP explícita no restringe el PvP.
+                    }
+                }
+                if (hasPvPFlag && !pvpAllowed) return false;
             }
             return true;
         } catch (Throwable error) {
