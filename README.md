@@ -10,7 +10,7 @@ Plugin de gestión de combate inspirado en PvPManager y adaptado para **Nukkit P
 - Activación y desactivación del PvP por jugador, con estado persistente y tiempo de espera configurable.
 - Protección para jugadores nuevos con vencimiento persistente y opción para desactivarla manualmente.
 - Protección al reaparecer, durante una cantidad configurable de segundos.
-- Lista negra o lista blanca de comandos durante el combate.
+- Bloqueo de comandos de escape durante el combate (activado por defecto); el bypass requiere permiso explícito.\n- Protección opcional para jugadores nuevos (desactivada por defecto para que el combate funcione desde el primer momento).
 - Restricciones opcionales para colocar, romper e interactuar con bloques mientras el jugador está en combate.
 - Anti-escape entre mundos: impide que un jugador marcado en combate se teletransporte a mundos seguros configurados.
 - Antiabuso de asesinatos: registra asesinatos repetidos dentro de un intervalo, advierte antes del límite y bloquea el daño PvP letal al alcanzar el máximo configurado.
@@ -93,7 +93,7 @@ AreaProtectionIntegration:
 ExcludedWorlds: []
 ```
 
-Los mensajes se pueden personalizar en la sección `Messages`. Las preferencias de PvP se guardan en `pvp.yml` y los tiempos de protección para jugadores nuevos se guardan en `protection.yml`.
+El bloqueo de comandos está activo por defecto y bloquea los comandos configurados en `CombatTag.BlockCommands.List`. La protección de jugadores nuevos es opcional y viene desactivada por defecto. Las regiones indicadas en `AreaProtectionIntegration.CombatEntryBlockedAreas` impiden la entrada de jugadores marcados en combate, aunque sus banderas `pvp` estén en `true`.\n\nLos mensajes se pueden personalizar en la sección `Messages`. Las preferencias de PvP se guardan en `pvp.yml` y los tiempos de protección para jugadores nuevos se guardan en `protection.yml`.
 
 ### Integración con AreaProtection
 
