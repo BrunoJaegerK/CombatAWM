@@ -28,7 +28,7 @@ ExcludedWorlds: []
 Messages:
   CombatBar:
     FirstText: '§4Combat time remaining: §c'
-    SecondText: "\\n§fLast opponent: §2"
+    SecondText: "\n§fLast opponent: §2"
   Status: '§ePvP: {pvp} §7| Combat: {combat}'
   PvPEnabled: '§aPvP has been enabled.'
   PvPDisabled: '§cPvP has been disabled. You will no longer be able to fight or be attacked.'
