@@ -102,11 +102,12 @@ public class CombatMain extends PluginBase {
 
             java.lang.reflect.Method getAreaByPos = areaProtection.getClass().getMethod("getAreaByPos", cn.nukkit.level.Position.class);
             java.lang.reflect.Method hasBypass = areaProtection.getClass().getMethod("hasBypassPerms", Player.class);
-            boolean bypass = Boolean.TRUE.equals(hasBypass.invoke(areaProtection, attacker));
-            if (bypass && getConfig().getBoolean("AreaProtectionIntegration.RespectBypass", true)) return true;
+            boolean bypass = Boolean.TRUE.equals(hasBypass.invoke(areaProtection, attacker))
+                    && getConfig().getBoolean("AreaProtectionIntegration.RespectBypass", true);
 
             Player[] players = new Player[]{attacker, victim};
             for (Player player : players) {
+                if (player.equals(attacker) && bypass) continue;
                 Object area = getAreaByPos.invoke(areaProtection, player.getPosition());
                 if (area == null) continue;
                 java.util.Map<?, ?> flags = (java.util.Map<?, ?>) area.getClass().getMethod("getFlags").invoke(area);
