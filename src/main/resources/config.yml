@@ -43,6 +43,12 @@ AntiKillAbuse:
 
 ExcludedWorlds: []
 
+# Optional integration with AreaProtection (no extra dependency required).
+AreaProtectionIntegration:
+  Enabled: true
+  # If enabled, AreaProtection bypass users can attack even in areas with pvp:false.
+  RespectBypass: true
+
 Messages:
   CombatBar:
     FirstText: '§4Combat time remaining: §c'
@@ -51,6 +57,7 @@ Messages:
   PvPEnabled: '§aPvP has been enabled.'
   PvPDisabled: '§cPvP has been disabled.'
   PvPDisabledForFight: '§cPvP is disabled for one of the players.'
+  AreaProtectionPvPDisabled: '§cPvP is disabled in this protected area.'
   ToggleInCombat: '§cYou cannot toggle PvP while tagged in combat.'
   ToggleCooldown: '§cWait {time}s before toggling PvP again.'
   NewbieStatus: '§aNewbie protection: §e{time}s remaining.'
