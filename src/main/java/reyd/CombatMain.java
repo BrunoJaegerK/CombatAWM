@@ -120,13 +120,29 @@ public class CombatMain extends PluginBase {
 
     public void removeCombatPair(Player player) {
         if (player == null) return;
-        DetailsPVP session = cooldownH.remove(key(player));
-        if (session != null) {
-            Player opponent = session.getOpponent();
-            session.removePlayer();
-            if (opponent != null) {
-                DetailsPVP other = cooldownH.remove(key(opponent));
-                if (other != null && other.getOpponent() != null && other.getOpponent().getName().equalsIgnoreCase(player.getName())) other.removePlayer();
+        String playerKey = key(player);
+        DetailsPVP own = cooldownH.remove(playerKey);
+        Player opponent = own == null ? null : own.getOpponent();
+        if (own != null) own.removePlayer();
+
+        if (opponent != null) {
+            String opponentKey = key(opponent);
+            DetailsPVP linked = cooldownH.get(opponentKey);
+            if (linked != null && linked.getOpponent() != null
+                    && linked.getOpponent().getName().equalsIgnoreCase(player.getName())) {
+                cooldownH.remove(opponentKey);
+                linked.removePlayer();
+            }
+        }
+
+        // Also clean any session that points at this player even if their own tag expired earlier.
+        java.util.Iterator<java.util.Map.Entry<String, DetailsPVP>> iterator = cooldownH.entrySet().iterator();
+        while (iterator.hasNext()) {
+            java.util.Map.Entry<String, DetailsPVP> entry = iterator.next();
+            Player taggedOpponent = entry.getValue().getOpponent();
+            if (taggedOpponent != null && taggedOpponent.getName().equalsIgnoreCase(player.getName())) {
+                iterator.remove();
+                entry.getValue().removePlayer();
             }
         }
     }
