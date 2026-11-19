@@ -1,3 +1,38 @@
-DetailsPVP:
-  firstText: 'Until the еnd of the fight: §4'
-  secondText: '§fLаst Fight: §2'
+# CombatAWM settings - compatible with Nukkit PetteriM1 Edition
+CombatTag:
+  Enabled: true
+  DurationSeconds: 20
+  # Only tag if the attack will deal positive final damage.
+  TagOnlyWhenDamageIsApplied: true
+  # Prevent commands while tagged. Blacklist mode blocks only listed commands.
+  BlockCommands:
+    Enabled: false
+    WhitelistMode: false
+    List:
+      - spawn
+      - home
+      - tpa
+      - tp
+      - warp
+      - lobby
+
+CombatLog:
+  KillOnLogout: true
+
+# PvP preferences are saved separately in pvp.yml.
+PvP:
+  DefaultEnabled: true
+
+ExcludedWorlds: []
+
+Messages:
+  CombatBar:
+    FirstText: '§4Combat time remaining: §c'
+    SecondText: '\n§fLast opponent: §2'
+  Status: '§ePvP: {pvp} §7| Combat: {combat}'
+  PvPEnabled: '§aPvP has been enabled.'
+  PvPDisabled: '§cPvP has been disabled. You will no longer be able to fight or be attacked.'
+  PvPDisabledForFight: '§cPvP is disabled for one of the players.'
+  CommandBlocked: '§cYou cannot use that command while in combat.'
+  NoPermission: '§cYou do not have permission.'
+  Reloaded: '§aCombatAWM configuration reloaded.'
