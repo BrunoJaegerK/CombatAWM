@@ -34,7 +34,12 @@ public class CombatMain extends PluginBase {
                 if (session.decreaseCooldown() <= 0) cooldownH.remove(key(session.getPlayer()), session);
             }
             long now = System.currentTimeMillis();
-            newbieExpiry.entrySet().removeIf(e -> e.getValue() <= now);
+            for (Map.Entry<String, Long> entry : new ArrayList<>(newbieExpiry.entrySet())) {
+                if (entry.getValue() <= now && newbieExpiry.remove(entry.getKey(), entry.getValue())) {
+                    Player online = getServer().getPlayer(entry.getKey());
+                    if (online != null) online.sendMessage(getConfig().getString("Messages.NewbieExpired", "§aYour newbie protection has expired."));
+                }
+            }
             respawnExpiry.entrySet().removeIf(e -> e.getValue() <= now);
         }, 20);
         getLogger().info("CombatAWM enabled.");
@@ -93,10 +98,12 @@ public class CombatMain extends PluginBase {
     public void beginNewbieProtection(Player p) {
         if (!getConfig().getBoolean("NewbieProtection.Enabled", true) || isWorldExcluded(p)) return;
         String n=key(p);
-        if (!newbieExpiry.containsKey(n)) {
+        long current = newbieExpiry.getOrDefault(n, 0L);
+        if (current <= System.currentTimeMillis()) {
             long seconds=getConfig().getInt("NewbieProtection.DurationSeconds",600);
-            if (seconds>0) { newbieExpiry.put(n,System.currentTimeMillis()+seconds*1000L); saveProtectionData(); }
+            if (seconds>0) { current=System.currentTimeMillis()+seconds*1000L; newbieExpiry.put(n,current); saveProtectionData(); }
         }
+        if (current > System.currentTimeMillis()) p.sendMessage(getConfig().getString("Messages.NewbieStarted", "§aYou have newbie protection for §e{time}s§a.").replace("{time}", String.valueOf(Math.max(0,(current-System.currentTimeMillis()+999)/1000)));
     }
     public boolean disableNewbieProtection(Player p) {
         if (!getConfig().getBoolean("NewbieProtection.AllowPlayerDisable",true)) return false;
