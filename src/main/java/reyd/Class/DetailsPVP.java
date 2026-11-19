@@ -7,87 +7,73 @@ import reyd.CombatMain;
 public class DetailsPVP {
 
     private int time;
-    private Player thisPerson;
+    private final Player thisPerson;
     private Player oppositePlayer;
-
     private DummyBossBar dummyBossBar;
 
-    public DetailsPVP(Player thisPerson, Player oppositePlayer){
-
-        time = 20;
+    public DetailsPVP(Player thisPerson, Player oppositePlayer, int duration) {
         this.thisPerson = thisPerson;
         this.oppositePlayer = oppositePlayer;
+        this.time = Math.max(1, duration);
+        createBossBar();
+    }
 
+    private String getText() {
+        return CombatMain.firstText + time + CombatMain.secondText + oppositePlayer.getName();
+    }
 
-        StringBuilder builder = new StringBuilder()
-                .append(CombatMain.firstText)
-                .append(time)
-                .append("\n\n")
-                .append(CombatMain.secondText)
-                .append(oppositePlayer.getName());
-
-
+    private void createBossBar() {
         dummyBossBar = new DummyBossBar.Builder(thisPerson)
-                .text(builder.toString())
+                .text(getText())
                 .build();
         thisPerson.createBossBar(dummyBossBar);
-
-
+        updateBossBar();
     }
 
-    public void reloadCooldown(Player newOppositePlayer){
-
-        time = 20;
+    public void reloadCooldown(Player newOppositePlayer) {
+        this.time = Math.max(1, CombatMain.getInstance().getConfig().getInt("CombatTag.DurationSeconds", 20));
         this.oppositePlayer = newOppositePlayer;
-
-        StringBuilder builder = new StringBuilder()
-                .append(CombatMain.firstText)
-                .append(time)
-                .append("\n\n")
-                .append(CombatMain.secondText)
-                .append(oppositePlayer.getName());
-
-        dummyBossBar.setText(builder.toString());
-        dummyBossBar.setLength(20 * 5);
-
-
+        updateBossBar();
     }
 
-    public int decreaseCooldown(){
+    private void updateBossBar() {
+        if (dummyBossBar == null) return;
+        dummyBossBar.setText(getText());
+        float progress = time * 100f / Math.max(1,
+                CombatMain.getInstance().getConfig().getInt("CombatTag.DurationSeconds", 20));
+        dummyBossBar.setLength(Math.min(100f, Math.max(0f, progress)));
+    }
 
-        time--;
-
-        if (time == 0){
-            dummyBossBar.destroy();
+    public int decreaseCooldown() {
+        if (time > 0) time--;
+        if (time <= 0) {
+            removePlayer();
             return 0;
         }
-
-
-        StringBuilder builder = new StringBuilder()
-                .append(CombatMain.firstText)
-                .append(time)
-                .append("\n\n")
-                .append(CombatMain.secondText)
-                .append(oppositePlayer.getName());
-
-        dummyBossBar.setText(builder.toString());
-        dummyBossBar.setLength(time * 5);
-        return 1;
+        updateBossBar();
+        return time;
     }
 
-    public void removePlayer(){
-
-        dummyBossBar.destroy();
-        CombatMain.getInstance().cooldownH.remove(thisPerson.getName());
-
+    public Player getPlayer() {
+        return thisPerson;
     }
 
-    public void quitGame(){
-
-        dummyBossBar.destroy();
-        thisPerson.kill();
-        CombatMain.getInstance().cooldownH.remove(thisPerson.getName());
-
+    public Player getOpponent() {
+        return oppositePlayer;
     }
 
+    public void removePlayer() {
+        if (dummyBossBar != null) {
+            dummyBossBar.destroy();
+            dummyBossBar = null;
+        }
+    }
+
+    public void quitGame() {
+        removePlayer();
+        CombatMain.getInstance().removeCombatPair(thisPerson);
+        if (CombatMain.getInstance().getConfig().getBoolean("CombatLog.KillOnLogout", true)) {
+            thisPerson.kill();
+        }
+    }
 }
