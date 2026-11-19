@@ -4,9 +4,9 @@ CombatTag:
   DurationSeconds: 20
   TagOnlyWhenDamageIsApplied: true
   BlockCommands:
-    Enabled: false
+    Enabled: true
     WhitelistMode: false
-    List: [spawn, home, tpa, tp, warp, lobby]
+    List: [spawn, home, tpa, tp, tpaccept, warp, lobby, hub, back, rtp, wild]
   BlockPlace:
     Enabled: false
   BlockBreak:
@@ -46,8 +46,13 @@ ExcludedWorlds: []
 # Optional integration with AreaProtection (no extra dependency required).
 AreaProtectionIntegration:
   Enabled: true
-  # If enabled, AreaProtection bypass users can attack even in areas with pvp:false.
+  # Respeta la bandera pvp:false de AreaProtection al aplicar CombatTag.
   RespectBypass: true
+  # Impide que un jugador en combate entre a las regiones indicadas, incluso si pvp:true.
+  BlockCombatEntry: true
+  CombatEntryBlockedAreas:
+    - lobby-pvp
+    - lobby-nopvp
 
 Messages:
   CombatBar:
@@ -69,6 +74,7 @@ Messages:
   ProtectedCannotAttack: '§cYou cannot attack while protected.'
   RespawnProtected: '§cThat player is protected after respawning.'
   BorderHoppingBlocked: '§cYou cannot escape combat by entering a safe world.'
+  CombatAreaEntryBlocked: '§cNo puedes entrar en esa zona mientras estés en combate.'
   ActionBlocked: '§cYou cannot do that while in combat.'
   CommandBlocked: '§cYou cannot use that command while in combat.'
   KillAbuse: '§cRepeatedly killing the same player is restricted.'
