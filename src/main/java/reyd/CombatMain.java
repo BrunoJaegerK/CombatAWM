@@ -126,7 +126,7 @@ public class CombatMain extends PluginBase {
             session.removePlayer();
             if (opponent != null) {
                 DetailsPVP other = cooldownH.remove(key(opponent));
-                if (other != null) other.removePlayer();
+                if (other != null && other.getOpponent() != null && other.getOpponent().getName().equalsIgnoreCase(player.getName())) other.removePlayer();
             }
         }
     }
