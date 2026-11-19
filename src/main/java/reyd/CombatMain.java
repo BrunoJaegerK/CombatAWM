@@ -25,6 +25,7 @@ public class CombatMain extends PluginBase {
     @Override public void onEnable() {
         instance = this;
         saveDefaultConfig();
+        migrateConfig();
         loadSettings();
         loadPvPStates();
         loadProtectionData();
@@ -43,6 +44,34 @@ public class CombatMain extends PluginBase {
             respawnExpiry.entrySet().removeIf(e -> e.getValue() <= now);
         }, 20);
         getLogger().info("CombatAWM enabled.");
+    }
+
+    /**
+     * Actualiza las opciones de versiones anteriores sin reemplazar el resto
+     * de la configuración personalizada del servidor.
+     */
+    private void migrateConfig() {
+        int version = getConfig().getInt("ConfigVersion", 1);
+        if (version >= 2) return;
+
+        // Valores corregidos solicitados: bloqueo de comandos y combate activo
+        // desde el primer momento, sin que la protección de novatos lo silencie.
+        getConfig().set("CombatTag.BlockCommands.Enabled", true);
+        getConfig().set("NewbieProtection.Enabled", false);
+
+        if (!getConfig().exists("AreaProtectionIntegration.Enabled")) {
+            getConfig().set("AreaProtectionIntegration.Enabled", true);
+        }
+        if (!getConfig().exists("AreaProtectionIntegration.BlockCombatEntry")) {
+            getConfig().set("AreaProtectionIntegration.BlockCombatEntry", true);
+        }
+        if (!getConfig().exists("AreaProtectionIntegration.CombatEntryBlockedAreas")) {
+            getConfig().set("AreaProtectionIntegration.CombatEntryBlockedAreas",
+                    Arrays.asList("lobby-pvp", "lobby-nopvp"));
+        }
+        getConfig().set("ConfigVersion", 2);
+        saveConfig();
+        getLogger().info("Configuración actualizada a la versión 2.");
     }
 
     private void loadSettings() {
