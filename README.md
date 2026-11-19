@@ -72,10 +72,14 @@ PvP preferences are stored in `pvp.yml` separately from the main configuration.
 This project targets Java 17 and the Nukkit PetteriM1 Edition Maven artifact.
 
 ```bash
+# Build and install the exact PM1E API locally first (Java 17)
+git clone --branch release https://github.com/BrunoJaegerK/NukkitPetteriM1Edition.git nukkit-server
+mvn -f nukkit-server/pom.xml -DskipTests -Dmaven.test.skip=true install
+# Then build CombatAWM
 mvn clean package
 ```
 
-GitHub Actions automatically builds on pushes, pull requests, and manual workflow runs. The compiled jar is published as the **CombatAWM** workflow artifact.
+GitHub Actions checks out the PM1E source, installs its Maven artifact into the runner's local repository, builds CombatAWM, and uploads the compiled jar as the **CombatAWM** workflow artifact. It runs on pushes, pull requests, and manual workflow dispatch.
 
 ## Compatibility
 
