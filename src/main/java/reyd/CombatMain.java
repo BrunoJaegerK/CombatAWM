@@ -123,6 +123,14 @@ public class CombatMain extends PluginBase {
         if(opponent!=null){String ok=key(opponent);DetailsPVP linked=cooldownH.get(ok);if(linked!=null&&linked.getOpponent()!=null&&key(linked.getOpponent().getName()).equals(k)){cooldownH.remove(ok);linked.removePlayer();}}
         for(Map.Entry<String,DetailsPVP> e:new ArrayList<>(cooldownH.entrySet())) if(e.getValue().getOpponent()!=null&&key(e.getValue().getOpponent().getName()).equals(k)){cooldownH.remove(e.getKey());e.getValue().removePlayer();}
     }
+    public boolean isKillLimitReached(Player killer, Player victim) {
+        if (!getConfig().getBoolean("AntiKillAbuse.Enabled", true) || killer.hasPermission("combatawm.bypass.killabuse")) return false;
+        Deque<Long> times = killHistory.getOrDefault(key(killer), Collections.emptyMap()).get(key(victim));
+        if (times == null) return false;
+        long now=System.currentTimeMillis(), window=getConfig().getInt("AntiKillAbuse.WindowSeconds",3600)*1000L;
+        synchronized(times) { while(!times.isEmpty() && now-times.peekFirst()>window) times.pollFirst(); return times.size() >= getConfig().getInt("AntiKillAbuse.MaxKills",3); }
+    }
+
     public boolean recordKill(Player killer, Player victim) {
         if(!getConfig().getBoolean("AntiKillAbuse.Enabled",true) || killer.hasPermission("combatawm.bypass.killabuse")) return false;
         String k=key(killer), v=key(victim); long now=System.currentTimeMillis(), window=getConfig().getInt("AntiKillAbuse.WindowSeconds",3600)*1000L;
