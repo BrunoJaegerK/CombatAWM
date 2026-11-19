@@ -22,7 +22,7 @@ PvP:
   ToggleCooldownSeconds: 15
 
 NewbieProtection:
-  Enabled: true
+  Enabled: false
   DurationSeconds: 600
   AllowPlayerDisable: true
   RemoveOnDeath: true
