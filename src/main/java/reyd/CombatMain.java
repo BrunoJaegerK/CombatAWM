@@ -24,6 +24,7 @@ public class CombatMain extends PluginBase {
 
     private Config pvpConfig;
     private final Set<String> pvpDisabled = new HashSet<>();
+    private final Set<String> pvpEnabledOverrides = new HashSet<>();
 
     @Override
     public void onEnable() {
@@ -53,31 +54,38 @@ public class CombatMain extends PluginBase {
         File file = new File(getDataFolder(), "pvp.yml");
         pvpConfig = new Config(file, Config.YAML);
         pvpDisabled.clear();
-        for (String name : pvpConfig.getStringList("disabled")) {
-            pvpDisabled.add(name.toLowerCase(Locale.ROOT));
-        }
+        pvpEnabledOverrides.clear();
+        for (String name : pvpConfig.getStringList("disabled")) pvpDisabled.add(name.toLowerCase(Locale.ROOT));
+        for (String name : pvpConfig.getStringList("enabled")) pvpEnabledOverrides.add(name.toLowerCase(Locale.ROOT));
     }
 
     public void savePvPStates() {
         if (pvpConfig == null) return;
         pvpConfig.set("disabled", new HashSet<>(pvpDisabled));
+        pvpConfig.set("enabled", new HashSet<>(pvpEnabledOverrides));
         pvpConfig.save();
     }
 
     public boolean isPvPEnabled(Player player) {
-        return !pvpDisabled.contains(key(player));
+        String name = key(player);
+        if (pvpDisabled.contains(name)) return false;
+        if (pvpEnabledOverrides.contains(name)) return true;
+        return getConfig().getBoolean("PvP.DefaultEnabled", true);
     }
 
     public boolean togglePvP(Player player) {
         String name = key(player);
-        if (pvpDisabled.remove(name)) {
+        if (isPvPEnabled(player)) {
+            pvpEnabledOverrides.remove(name);
+            pvpDisabled.add(name);
+            removeCombatPair(player);
             savePvPStates();
-            return true;
+            return false;
         }
-        pvpDisabled.add(name);
-        removeCombat(player);
+        pvpDisabled.remove(name);
+        pvpEnabledOverrides.add(name);
         savePvPStates();
-        return false;
+        return true;
     }
 
     public boolean isWorldExcluded(Player player) {
