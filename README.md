@@ -15,6 +15,7 @@ Combat management plugin inspired by PvPManager, adapted for **Nukkit PetteriM1 
 - Anti-border-hopping: blocks teleporting tagged players into configured safe worlds.
 - Anti-kill-abuse: records repeated kills within a time window, warns before the threshold, and blocks lethal PvP damage once the configured limit has already been reached.
 - Excluded worlds.
+- Optional AreaProtection integration: honors each area's `pvp` flag for both attacker and victim, and respects AreaProtection bypass players.
 - Player commands: `/combat`, `/combat status`, `/combat toggle`, `/combat newbie`, `/combat newbie disable`, `/combat list`.
 - Aliases: `/pvp`, `/pvptoggle`, `/pvpstatus`, `/pvplist`, `/newbie`, `/tag`.
 - Admin command: `/combat untag <player>`, `/combat reload`.
@@ -84,6 +85,10 @@ AntiKillAbuse:
   WarnBeforeLimit: true
 
 ExcludedWorlds: []
+
+AreaProtectionIntegration:
+  Enabled: true
+  RespectBypass: true
 ```
 
 Messages are customizable under `Messages`. Player settings are saved to `pvp.yml`; newbie expiry timestamps are saved in `protection.yml`.
@@ -109,4 +114,4 @@ The workflow uploads `target/CombatAWM.jar` as an artifact on pushes, pull reque
 
 ## Notes
 
-This is a native Nukkit plugin. Bukkit/Spigot/Paper APIs and features requiring WorldGuard, PlaceholderAPI, Bukkit teams, or NPCs are not used. Safe-world checks use world names configured in CombatAWM. Please test on a staging server before production use.
+This is a native Nukkit plugin. AreaProtection is optional and detected through reflection, so it is not a compile-time dependency. When installed, PvP is blocked if either player's area has `pvp:false`; players with AreaProtection bypass are exempt when `RespectBypass` is enabled. Safe-world checks also use world names configured in CombatAWM. Please test on a staging server before production use.
