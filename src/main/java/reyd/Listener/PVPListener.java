@@ -103,7 +103,7 @@ public class PVPListener implements Listener {
         if (event.isCancelled()) return;
         CombatMain plugin=CombatMain.getInstance();
         Player player=event.getPlayer();
-        if (!plugin.isCombatTagged(player) || player.hasPermission("combatawm.bypass.borderhopping")) return;
+        if (!plugin.isCombatTagged(player) || player.hasPermission("combatawm.bypass.areaprotection")) return;
         if (plugin.isEnteringCombatRestrictedArea(event.getFrom(), event.getTo())) {
             event.setCancelled(true);
             player.sendMessage(plugin.getConfig().getString("Messages.CombatAreaEntryBlocked",
@@ -115,7 +115,7 @@ public class PVPListener implements Listener {
     public void onTeleport(PlayerTeleportEvent event) {
         CombatMain plugin=CombatMain.getInstance();
         Player p=event.getPlayer();
-        if (plugin.isCombatTagged(p) && !p.hasPermission("combatawm.bypass.borderhopping")
+        if (plugin.isCombatTagged(p) && !p.hasPermission("combatawm.bypass.areaprotection")
                 && plugin.isEnteringCombatRestrictedArea(event.getFrom(), event.getTo())) {
             event.setCancelled(true);
             p.sendMessage(plugin.getConfig().getString("Messages.CombatAreaEntryBlocked",
