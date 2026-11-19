@@ -1,46 +1,48 @@
 # CombatAWM
 
-Combat management plugin inspired by PvPManager, adapted for **Nukkit PetteriM1 Edition**. CombatAWM does not provide money, rewards, kill bonuses, or reward commands.
+Plugin de gestión de combate inspirado en PvPManager y adaptado para **Nukkit PetteriM1 Edition**. CombatAWM no incluye dinero, recompensas, bonificaciones por asesinatos ni comandos de recompensas.
 
-## Features
+## Características
 
-- Combat tagging on player-vs-player damage, including player-shot projectiles.
-- Configurable combat timer and boss-bar text showing the remaining tag and last opponent.
-- Combat-log punishment (kill on logout) can be enabled or disabled.
-- PvP toggle, persistent per-player state, and configurable toggle cooldown.
-- Newbie protection with persistent expiry and optional manual disable.
-- Respawn protection for a configurable number of seconds.
-- Command blacklist or whitelist during combat.
-- Optional restrictions on block placement, breaking, and interaction while tagged.
-- Anti-border-hopping: blocks teleporting tagged players into configured safe worlds.
-- Anti-kill-abuse: records repeated kills within a time window, warns before the threshold, and blocks lethal PvP damage once the configured limit has already been reached.
-- Excluded worlds.
-- Optional AreaProtection integration: honors each area's `pvp` flag for both attacker and victim, and respects AreaProtection bypass players.
-- Player commands: `/combat`, `/combat status`, `/combat toggle`, `/combat newbie`, `/combat newbie disable`, `/combat list`.
-- Aliases: `/pvp`, `/pvptoggle`, `/pvpstatus`, `/pvplist`, `/newbie`, `/tag`.
-- Admin command: `/combat untag <player>`, `/combat reload`.
-- Persisted PvP preferences and newbie-protection timers.
+- Etiquetado de combate al causar daño entre jugadores, incluidos los proyectiles disparados por jugadores.
+- Temporizador de combate configurable y barra de jefe que muestra el tiempo restante y el último oponente.
+- Castigo por desconectarse durante el combate: eliminar al jugador al cerrar sesión (configurable).
+- Activación y desactivación del PvP por jugador, con estado persistente y tiempo de espera configurable.
+- Protección para jugadores nuevos con vencimiento persistente y opción para desactivarla manualmente.
+- Protección al reaparecer, durante una cantidad configurable de segundos.
+- Lista negra o lista blanca de comandos durante el combate.
+- Restricciones opcionales para colocar, romper e interactuar con bloques mientras el jugador está en combate.
+- Anti-escape entre mundos: impide que un jugador marcado en combate se teletransporte a mundos seguros configurados.
+- Antiabuso de asesinatos: registra asesinatos repetidos dentro de un intervalo, advierte antes del límite y bloquea el daño PvP letal al alcanzar el máximo configurado.
+- Mundos excluidos de las mecánicas de combate.
+- Integración opcional con **AreaProtection 2.0.4**: respeta la bandera `pvp` de las áreas tanto para el atacante como para la víctima. También respeta el bypass del atacante en su propia área, sin permitir que ese bypass ignore la protección del área de la víctima.
+- La integración con AreaProtection es opcional y no requiere añadirlo como dependencia de compilación.
 
-## Commands
+## Comandos
 
-| Command | Function | Permission |
+| Comando | Función | Permiso |
 |---|---|---|
-| `/combat`, `/combat status`, `/pvpstatus`, `/tag` | PvP/combat status | `combatawm.command` |
-| `/combat toggle`, `/pvp`, `/pvptoggle` | Toggle personal PvP | `combatawm.command` |
-| `/combat newbie`, `/newbie` | Show newbie protection timer | `combatawm.command` |
-| `/combat newbie disable` | Remove newbie protection if allowed | `combatawm.command` |
-| `/combat list`, `/pvplist` | List online players with PvP enabled | `combatawm.command` |
-| `/combat untag <player>` | Remove combat tag from both players | `combatawm.admin` |
-| `/combat reload` | Reload config | `combatawm.admin` |
+| `/combat`, `/combat status`, `/pvpstatus`, `/tag` | Muestra el estado del PvP y del combate | `combatawm.command` |
+| `/combat toggle`, `/pvp`, `/pvptoggle` | Activa o desactiva el PvP personal | `combatawm.command` |
+| `/combat newbie`, `/newbie` | Muestra el tiempo restante de protección para jugadores nuevos | `combatawm.command` |
+| `/combat newbie disable`, `/newbie disable` | Desactiva la protección para jugadores nuevos, si está permitido | `combatawm.command` |
+| `/combat list`, `/pvplist` | Lista los jugadores conectados que tienen el PvP activado | `combatawm.command` |
+| `/combat untag <jugador>` | Elimina la marca de combate de ambos jugadores | `combatawm.admin` |
+| `/combat reload` | Recarga la configuración | `combatawm.admin` |
 
-Bypass permissions (default operator):
-- `combatawm.bypass.commands`
-- `combatawm.bypass.actions`
-- `combatawm.bypass.borderhopping`
-- `combatawm.bypass.togglecooldown`
-- `combatawm.bypass.killabuse`
+### Permisos de bypass
 
-## Config
+Por defecto, estos permisos están asignados a operadores:
+
+- `combatawm.bypass.commands`: evita el bloqueo de comandos durante el combate.
+- `combatawm.bypass.actions`: evita las restricciones de acciones durante el combate.
+- `combatawm.bypass.borderhopping`: evita la restricción de teletransporte a mundos seguros.
+- `combatawm.bypass.togglecooldown`: evita el tiempo de espera para cambiar el PvP.
+- `combatawm.bypass.killabuse`: evita las restricciones contra el abuso de asesinatos.
+
+## Configuración
+
+Fragmento de las opciones principales de `config.yml`:
 
 ```yaml
 CombatTag:
@@ -84,25 +86,35 @@ AntiKillAbuse:
   WindowSeconds: 3600
   WarnBeforeLimit: true
 
-ExcludedWorlds: []
-
 AreaProtectionIntegration:
   Enabled: true
   RespectBypass: true
+
+ExcludedWorlds: []
 ```
 
-Messages are customizable under `Messages`. Player settings are saved to `pvp.yml`; newbie expiry timestamps are saved in `protection.yml`.
+Los mensajes se pueden personalizar en la sección `Messages`. Las preferencias de PvP se guardan en `pvp.yml` y los tiempos de protección para jugadores nuevos se guardan en `protection.yml`.
 
-## Installation
+### Integración con AreaProtection
 
-1. Download `CombatAWM.jar` from Releases or the GitHub Actions artifact.
-2. Place it in the server's `plugins` directory.
-3. Start the server and edit `plugins/CombatAWM/config.yml`.
-4. Run `/combat reload` or restart.
+1. Instala AreaProtection 2.0.4 en el servidor si deseas utilizar esta integración.
+2. Mantén `AreaProtectionIntegration.Enabled: true` en la configuración de CombatAWM.
+3. Configura la bandera `pvp` de cada área desde AreaProtection.
+4. Si una de las dos posiciones (atacante o víctima) está en un área con `pvp: false`, CombatAWM cancela el daño y no aplica CombatTag.
+5. Si AreaProtection no está instalado, CombatAWM continúa funcionando con normalidad.
 
-## Build
+Con `RespectBypass: true`, el bypass de AreaProtection permite al atacante ignorar la bandera PvP de su propia área. No permite ignorar la protección del área donde se encuentra la víctima.
 
-Java 17. CI builds the Nukkit PetteriM1 Edition API source first, installs it into the runner's Maven repository, and then compiles CombatAWM.
+## Instalación
+
+1. Descarga `CombatAWM.jar` desde la sección de versiones o desde el artefacto de GitHub Actions.
+2. Coloca el archivo en la carpeta `plugins` del servidor.
+3. Inicia el servidor y edita `plugins/CombatAWM/config.yml`.
+4. Ejecuta `/combat reload` o reinicia el servidor para aplicar los cambios.
+
+## Compilación
+
+Se utiliza Java 17. El flujo de GitHub Actions compila primero el código fuente de la API de Nukkit PetteriM1 Edition, lo instala en el repositorio local de Maven y después compila CombatAWM.
 
 ```bash
 git clone --branch release https://github.com/BrunoJaegerK/NukkitPetteriM1Edition.git nukkit-server
@@ -110,8 +122,8 @@ mvn -f nukkit-server/pom.xml -DskipTests -Dmaven.test.skip=true install
 mvn clean package
 ```
 
-The workflow uploads `target/CombatAWM.jar` as an artifact on pushes, pull requests, and manual runs.
+GitHub Actions publica `target/CombatAWM.jar` como artefacto al recibir cambios, solicitudes de integración o ejecuciones manuales.
 
-## Notes
+## Notas
 
-This is a native Nukkit plugin. AreaProtection is optional and detected through reflection, so it is not a compile-time dependency. When installed, PvP is blocked if either player's area has `pvp:false`; players with AreaProtection bypass are exempt when `RespectBypass` is enabled. Safe-world checks also use world names configured in CombatAWM. Please test on a staging server before production use.
+CombatAWM es un plugin nativo para Nukkit PetteriM1 Edition. La integración con AreaProtection se realiza de forma opcional mediante reflexión, por lo que no es una dependencia obligatoria para compilar o ejecutar el plugin. Prueba los cambios en un servidor de pruebas antes de instalarlos en producción.
