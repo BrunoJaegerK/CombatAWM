@@ -70,7 +70,7 @@ public class DetailsPVP {
 
     public void quitGame() {
         removePlayer();
-        CombatMain.getInstance().cooldownH.remove(CombatMain.key(thisPerson.getName()));
+        CombatMain.getInstance().removeCombatPair(thisPerson);
         if (CombatMain.getInstance().getConfig().getBoolean("CombatLog.KillOnLogout", true)) {
             thisPerson.kill();
         }
