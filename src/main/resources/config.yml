@@ -1,38 +1,68 @@
-# CombatAWM settings - compatible with Nukkit PetteriM1 Edition
+# CombatAWM | Nukkit PetteriM1 Edition
 CombatTag:
   Enabled: true
   DurationSeconds: 20
-  # Only tag if the attack will deal positive final damage.
   TagOnlyWhenDamageIsApplied: true
-  # Prevent commands while tagged. Blacklist mode blocks only listed commands.
   BlockCommands:
     Enabled: false
     WhitelistMode: false
-    List:
-      - spawn
-      - home
-      - tpa
-      - tp
-      - warp
-      - lobby
+    List: [spawn, home, tpa, tp, warp, lobby]
+  BlockPlace:
+    Enabled: false
+  BlockBreak:
+    Enabled: false
+  BlockInteract:
+    Enabled: false
 
 CombatLog:
   KillOnLogout: true
 
-# PvP preferences are saved separately in pvp.yml.
 PvP:
   DefaultEnabled: true
+  ToggleCooldownSeconds: 15
+
+NewbieProtection:
+  Enabled: true
+  DurationSeconds: 600
+  AllowPlayerDisable: true
+  RemoveOnDeath: true
+
+RespawnProtection:
+  DurationSeconds: 3
+
+AntiBorderHopping:
+  Enabled: false
+  # Worlds considered safe. Combat-tagged players cannot teleport into these.
+  SafeWorlds: []
+
+AntiKillAbuse:
+  Enabled: true
+  MaxKills: 3
+  WindowSeconds: 3600
+  WarnBeforeLimit: true
 
 ExcludedWorlds: []
 
 Messages:
   CombatBar:
     FirstText: '§4Combat time remaining: §c'
-    SecondText: "\n§fLast opponent: §2"
+    SecondText: "\\n§fLast opponent: §2"
   Status: '§ePvP: {pvp} §7| Combat: {combat}'
   PvPEnabled: '§aPvP has been enabled.'
-  PvPDisabled: '§cPvP has been disabled. You will no longer be able to fight or be attacked.'
+  PvPDisabled: '§cPvP has been disabled.'
   PvPDisabledForFight: '§cPvP is disabled for one of the players.'
+  ToggleInCombat: '§cYou cannot toggle PvP while tagged in combat.'
+  ToggleCooldown: '§cWait {time}s before toggling PvP again.'
+  NewbieStatus: '§aNewbie protection: §e{time}s remaining.'
+  NewbieDisabled: '§aYour newbie protection has been disabled.'
+  NewbieCannotDisable: '§cYou cannot disable protection or it is not active.'
+  NewbieProtectedTarget: '§cThat player has newbie protection.'
+  ProtectedCannotAttack: '§cYou cannot attack while protected.'
+  RespawnProtected: '§cThat player is protected after respawning.'
+  BorderHoppingBlocked: '§cYou cannot escape combat by entering a safe world.'
+  ActionBlocked: '§cYou cannot do that while in combat.'
   CommandBlocked: '§cYou cannot use that command while in combat.'
+  KillAbuse: '§cRepeatedly killing the same player is restricted.'
+  KillAbuseWarning: '§eWarning: one more kill on this player will reach the limit.'
   NoPermission: '§cYou do not have permission.'
   Reloaded: '§aCombatAWM configuration reloaded.'
