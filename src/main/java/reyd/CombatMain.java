@@ -103,7 +103,7 @@ public class CombatMain extends PluginBase {
             long seconds=getConfig().getInt("NewbieProtection.DurationSeconds",600);
             if (seconds>0) { current=System.currentTimeMillis()+seconds*1000L; newbieExpiry.put(n,current); saveProtectionData(); }
         }
-        if (current > System.currentTimeMillis()) p.sendMessage(getConfig().getString("Messages.NewbieStarted", "§aYou have newbie protection for §e{time}s§a.").replace("{time}", String.valueOf(Math.max(0,(current-System.currentTimeMillis()+999)/1000)));
+        if (current > System.currentTimeMillis()) p.sendMessage(getConfig().getString("Messages.NewbieStarted", "§aYou have newbie protection for §e{time}s§a.").replace("{time}", String.valueOf(Math.max(0,(current-System.currentTimeMillis()+999)/1000))));
     }
     public boolean disableNewbieProtection(Player p) {
         if (!getConfig().getBoolean("NewbieProtection.AllowPlayerDisable",true)) return false;
