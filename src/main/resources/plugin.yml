@@ -1,16 +1,27 @@
 main: reyd.CombatMain
 name: CombatAWM
-version: 2.0.0
+version: 2.1.0
 api: ["1.0.14"]
 author: BrunoJaegerK
-description: Combat tagging and combat-log protection for Nukkit PetteriM1 Edition
+description: Combat management, combat log protection, and PvP protections for Nukkit PM1E
 commands:
   combat:
-    description: View combat status, toggle PvP, or reload CombatAWM
-    usage: "/combat <status|toggle|reload>"
+    description: CombatAWM command hub
+    usage: "/combat <status|toggle|newbie|list|untag|reload>"
+    aliases: [pvp, pvptoggle, pvpstatus, pvplist, newbie, tag]
     permission: combatawm.command
 permissions:
   combatawm.command:
     default: true
   combatawm.admin:
+    default: op
+  combatawm.bypass.commands:
+    default: op
+  combatawm.bypass.actions:
+    default: op
+  combatawm.bypass.borderhopping:
+    default: op
+  combatawm.bypass.togglecooldown:
+    default: op
+  combatawm.bypass.killabuse:
     default: op
