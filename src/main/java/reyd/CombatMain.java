@@ -109,16 +109,18 @@ public class CombatMain extends PluginBase {
         try {
             Object areaProtection = getServer().getPluginManager().getPlugin("AreaProtection");
             if (areaProtection == null || !Boolean.TRUE.equals(areaProtection.getClass().getMethod("isEnabled").invoke(areaProtection))) return false;
-            java.lang.reflect.Method getAreaByPos = areaProtection.getClass().getMethod("getAreaByPos", cn.nukkit.level.Position.class);
-            Object destinationArea = getAreaByPos.invoke(areaProtection, to);
-            if (destinationArea == null) return false;
-            String destinationName = String.valueOf(destinationArea.getClass().getMethod("getName").invoke(destinationArea));
-            boolean destinationRestricted = restricted.stream().anyMatch(n -> n.equalsIgnoreCase(destinationName));
-            if (!destinationRestricted) return false;
-            Object originArea = from == null ? null : getAreaByPos.invoke(areaProtection, from);
-            if (originArea == null) return true;
-            String originName = String.valueOf(originArea.getClass().getMethod("getName").invoke(originArea));
-            return !originName.equalsIgnoreCase(destinationName);
+            java.lang.reflect.Method getAreaByName = areaProtection.getClass().getMethod("getAreaByName", String.class);
+            for (String areaName : restricted) {
+                Object area = getAreaByName.invoke(areaProtection, areaName);
+                if (area == null) continue;
+                boolean enters = Boolean.TRUE.equals(area.getClass()
+                        .getMethod("isInArea", cn.nukkit.level.Position.class).invoke(area, to));
+                if (!enters) continue;
+                boolean wasInside = from != null && Boolean.TRUE.equals(area.getClass()
+                        .getMethod("isInArea", cn.nukkit.level.Position.class).invoke(area, from));
+                if (!wasInside) return true;
+            }
+            return false;
         } catch (Throwable error) {
             if (!areaProtectionWarningLogged) {
                 areaProtectionWarningLogged = true;
@@ -136,21 +138,26 @@ public class CombatMain extends PluginBase {
             Object areaProtection = getServer().getPluginManager().getPlugin("AreaProtection");
             if (areaProtection == null || !Boolean.TRUE.equals(areaProtection.getClass().getMethod("isEnabled").invoke(areaProtection))) return true;
 
-            java.lang.reflect.Method getAreaByPos = areaProtection.getClass().getMethod("getAreaByPos", cn.nukkit.level.Position.class);
             java.lang.reflect.Method hasBypass = areaProtection.getClass().getMethod("hasBypassPerms", Player.class);
             boolean bypass = Boolean.TRUE.equals(hasBypass.invoke(areaProtection, attacker))
                     && getConfig().getBoolean("AreaProtectionIntegration.RespectBypass", true);
 
-            Player[] players = new Player[]{attacker, victim};
-            for (Player player : players) {
-                if (player.equals(attacker) && bypass) continue;
-                Object area = getAreaByPos.invoke(areaProtection, player.getPosition());
-                if (area == null) continue;
+            // AreaProtection puede tener regiones superpuestas. Su getAreaByPos()
+            // devuelve solo la primera; aquí revisamos todas para no ignorar una
+            // región interior que tenga pvp:false.
+            java.lang.reflect.Field areasField = areaProtection.getClass().getField("areas");
+            Object rawAreas = areasField.get(null);
+            if (!(rawAreas instanceof Iterable)) return true;
+            for (Object area : (Iterable<?>) rawAreas) {
+                boolean containsAttacker = Boolean.TRUE.equals(area.getClass()
+                        .getMethod("isInArea", cn.nukkit.level.Position.class).invoke(area, attacker.getPosition()));
+                boolean containsVictim = Boolean.TRUE.equals(area.getClass()
+                        .getMethod("isInArea", cn.nukkit.level.Position.class).invoke(area, victim.getPosition()));
+                if (!containsAttacker && !containsVictim) continue;
                 java.util.Map<?, ?> flags = (java.util.Map<?, ?>) area.getClass().getMethod("getFlags").invoke(area);
-                // If PvP flag is not configured for this area, do not impose a restriction.
                 if (flags == null || !flags.containsKey("pvp")) continue;
                 boolean allowed = Boolean.TRUE.equals(area.getClass().getMethod("isAllowed", String.class).invoke(area, "pvp"));
-                if (!allowed) return false;
+                if (!allowed && !(containsAttacker && !containsVictim && bypass)) return false;
             }
             return true;
         } catch (Throwable error) {
