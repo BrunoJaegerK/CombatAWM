@@ -1,4 +1,5 @@
 # CombatAWM | Nukkit PetteriM1 Edition
+ConfigVersion: 2
 CombatTag:
   Enabled: true
   DurationSeconds: 20
