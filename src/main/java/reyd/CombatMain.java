@@ -91,6 +91,40 @@ public class CombatMain extends PluginBase {
     }
     public long getToggleCooldownLeft(Player p) { return Math.max(0, (toggleCooldowns.getOrDefault(key(p), 0L)-System.currentTimeMillis()+999)/1000); }
     public void setToggleCooldown(Player p) { toggleCooldowns.put(key(p), System.currentTimeMillis()+Math.max(0,getConfig().getInt("PvP.ToggleCooldownSeconds",15))*1000L); }
+    /** Optional reflective integration with AreaProtection (no compile-time dependency). */
+    private boolean areaProtectionWarningLogged = false;
+
+    public boolean isAreaProtectionPvPAllowed(Player attacker, Player victim) {
+        if (!getConfig().getBoolean("AreaProtectionIntegration.Enabled", true)) return true;
+        try {
+            cn.nukkit.plugin.Plugin areaProtection = getServer().getPluginManager().getPlugin("AreaProtection");
+            if (areaProtection == null || !areaProtection.isEnabled()) return true;
+
+            java.lang.reflect.Method getAreaByPos = areaProtection.getClass().getMethod("getAreaByPos", cn.nukkit.level.Position.class);
+            java.lang.reflect.Method hasBypass = areaProtection.getClass().getMethod("hasBypassPerms", Player.class);
+            boolean bypass = Boolean.TRUE.equals(hasBypass.invoke(areaProtection, attacker));
+            if (bypass && getConfig().getBoolean("AreaProtectionIntegration.RespectBypass", true)) return true;
+
+            Player[] players = new Player[]{attacker, victim};
+            for (Player player : players) {
+                Object area = getAreaByPos.invoke(areaProtection, player.getPosition());
+                if (area == null) continue;
+                java.util.Map<?, ?> flags = (java.util.Map<?, ?>) area.getClass().getMethod("getFlags").invoke(area);
+                // If PvP flag is not configured for this area, do not impose a restriction.
+                if (flags == null || !flags.containsKey("pvp")) continue;
+                boolean allowed = Boolean.TRUE.equals(area.getClass().getMethod("isAllowed", String.class).invoke(area, "pvp"));
+                if (!allowed) return false;
+            }
+            return true;
+        } catch (Throwable error) {
+            if (!areaProtectionWarningLogged) {
+                areaProtectionWarningLogged = true;
+                getLogger().warning("AreaProtection integration could not query its API; PvP will fail open. " + error.getClass().getSimpleName() + ": " + error.getMessage());
+            }
+            return true;
+        }
+    }
+
     public boolean isWorldExcluded(Player p) { return getConfig().getStringList("ExcludedWorlds").contains(p.getLevel().getName()); }
     public boolean isCombatTagged(Player p) { return cooldownH.containsKey(key(p)); }
     public boolean isNewbieProtected(Player p) { return newbieExpiry.getOrDefault(key(p),0L) > System.currentTimeMillis(); }
