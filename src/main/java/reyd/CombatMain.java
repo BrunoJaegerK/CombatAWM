@@ -172,7 +172,7 @@ public class CombatMain extends PluginBase {
 
     public boolean isWorldExcluded(Player p) { return getConfig().getStringList("ExcludedWorlds").contains(p.getLevel().getName()); }
     public boolean isCombatTagged(Player p) { return cooldownH.containsKey(key(p)); }
-    public boolean isNewbieProtected(Player p) { return newbieExpiry.getOrDefault(key(p),0L) > System.currentTimeMillis(); }
+    public boolean isNewbieProtected(Player p) { return getConfig().getBoolean("NewbieProtection.Enabled", false) && newbieExpiry.getOrDefault(key(p),0L) > System.currentTimeMillis(); }
     public long getNewbieSeconds(Player p) { return Math.max(0,(newbieExpiry.getOrDefault(key(p),0L)-System.currentTimeMillis()+999)/1000); }
     public void beginNewbieProtection(Player p) {
         if (!getConfig().getBoolean("NewbieProtection.Enabled", true) || isWorldExcluded(p)) return;
