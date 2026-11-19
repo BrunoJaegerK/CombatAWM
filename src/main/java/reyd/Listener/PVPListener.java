@@ -144,6 +144,6 @@ public class PVPListener implements Listener {
         Player killer=last instanceof EntityDamageByEntityEvent?getAttacker(((EntityDamageByEntityEvent)last).getDamager()):null;
         if(killer!=null&&killer!=victim)plugin.recordKill(killer,victim);
         plugin.removeCombatPair(victim);
-        if(plugin.getConfig().getBoolean("NewbieProtection.RemoveOnDeath",true))plugin.disableNewbieProtection(victim);
+        if(plugin.getConfig().getBoolean("NewbieProtection.RemoveOnDeath",true))plugin.removeNewbieProtection(victim);
     }
 }
